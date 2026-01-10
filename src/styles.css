@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0A66C2;
+  --bg-light: #F3F2EF;
+  --bg-dark: #121212;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: #121212;
+  font-family: 'Inter', sans-serif;
+}
+
+.dark body {
+    background-color: var(--bg-dark);
+    color: #F3F2EF;
+}
