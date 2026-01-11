@@ -1,4 +1,4 @@
-name: Frontend CI
+name: Frontend CI/CD
 
 on:
   push:
@@ -7,20 +7,17 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [22.x]
-
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4 # Versiyani v4 ga yangiladik
     
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+    - name: Use Node.js 22.x
+      uses: actions/setup-node@v4 # Versiyani v4 ga yangiladik
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 22
         cache: 'npm'
         
     - name: Install Dependencies
@@ -28,3 +25,17 @@ jobs:
       
     - name: Build
       run: npm run build -- --configuration=production
+
+    # Mana shu qism fayllarni Eskiz hostingga yuboradi
+    - name: Deploy to Eskiz via FTP
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        # DIQQAT: Angular 17+ build fayllarni 'dist/frontend/browser'ga tashlaydi
+        # Loyihangiz nomi 'frontend' bo'lsa, pastdagi yo'l to'g'ri:
+        local-dir: ./dist/frontend/browser/
+        server-dir: ./public_html/
+        state-name: .ftp-deploy-sync-state.json
