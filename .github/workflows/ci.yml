@@ -37,5 +37,5 @@ jobs:
         # DIQQAT: Angular 17+ build fayllarni 'dist/frontend/browser'ga tashlaydi
         # Loyihangiz nomi 'frontend' bo'lsa, pastdagi yo'l to'g'ri:
         local-dir: ./dist/frontend/browser/
-        server-dir: ./public_html/
+        server-dir: ./httpdocs/
         state-name: .ftp-deploy-sync-state.json
