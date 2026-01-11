@@ -39,3 +39,5 @@ jobs:
         local-dir: ./dist/frontend/browser/
         server-dir: ./httpdocs/
         state-name: .ftp-deploy-sync-state.json
+        protocol: ftp
+        port: 21
