@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
@@ -15,6 +16,7 @@ import { ProfileService } from '../../services/profile';
 export class AdminComponent implements OnInit {
   profileService = inject(ProfileService);
   authService = inject(AuthService);
+  destroyRef = inject(DestroyRef);
 
   // Local state for form
   formData: any = {};
@@ -31,7 +33,11 @@ export class AdminComponent implements OnInit {
   }
 
   loadProfile() {
-    this.profileService.getMe().subscribe({
+    this.profileService.getMe()
+    .pipe(
+     takeUntilDestroyed(this.destroyRef) 
+    )
+    .subscribe({
       next: (data: any) => {
         this.formData = JSON.parse(JSON.stringify(data)); // Deep copy for form
         // Ensure arrays exist
@@ -48,7 +54,11 @@ export class AdminComponent implements OnInit {
   }
 
   save() {
-    this.profileService.updateProfile(this.formData).subscribe({
+    this.profileService.updateProfile(this.formData)
+    .pipe(
+     takeUntilDestroyed(this.destroyRef) 
+    )
+    .subscribe({
       next: (data) => {
         this.profile.set(data);
         alert('Profile Saved!');
@@ -60,7 +70,11 @@ export class AdminComponent implements OnInit {
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
-      this.profileService.uploadFile(file).subscribe({
+      this.profileService.uploadFile(file)
+      .pipe(
+       takeUntilDestroyed(this.destroyRef) 
+      )
+      .subscribe({
         next: (res) => {
           if (!this.formData.profile) this.formData.profile = {};
           // Prepend backend URL if needed or serve relative
@@ -131,7 +145,7 @@ export class AdminComponent implements OnInit {
     this.authService.logout();
   }
 
-  setActiveTab(tab: 'profile' | 'experience' | 'education' | 'skills' | 'contacts') {
+  setActiveTab(tab: 'profile' | 'experience' | 'education' | 'skills' | 'contacts' = 'profile') {
     this.activeTab = tab;
   }
 
