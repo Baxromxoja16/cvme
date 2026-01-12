@@ -1,9 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProfileService } from '../../services/profile';
-import { AuthService } from '../../services/auth';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth';
+import { ProfileService } from '../../services/profile';
 
 @Component({
   selector: 'app-admin',
@@ -119,6 +119,7 @@ export class AdminComponent implements OnInit {
     const slug = this.formData.slug;
     if (!slug) return '#';
     // In production use base domain, in dev use localhost with subdomain
+    console.log(environment.production, slug, environment.baseDomain);
     if (environment.production) {
       return `http://${slug}.${environment.baseDomain}`;
     }
