@@ -3,7 +3,7 @@ export const environment = {
     apiUrl: 'https://piggy-bank-bhxy.onrender.com/api',
     authUrl: 'https://piggy-bank-bhxy.onrender.com/api/auth',
     baseUrl: 'https://piggy-bank-bhxy.onrender.com',
-    baseDomain: 'piggy-bank-bhxy.onrender.com',
+    baseDomain: 'cvme.uz',
     fileUrl: 'https://piggy-bank-bhxy.onrender.com'
 };
 
