@@ -1,8 +1,8 @@
-import { Routes, UrlSegment, UrlSegmentGroup, Route } from '@angular/router';
+import { inject } from '@angular/core';
+import { Routes, UrlSegment } from '@angular/router';
+import { AdminComponent } from './components/admin/admin';
 import { LandingComponent } from './components/landing/landing';
 import { PublicProfileComponent } from './components/public-profile/public-profile';
-import { AdminComponent } from './components/admin/admin';
-import { inject } from '@angular/core';
 import { AuthService } from './services/auth';
 
 // Simple guard
@@ -38,12 +38,12 @@ export function subdomainMatcher(url: UrlSegment[]) {
 }
 
 export const routes: Routes = [
-    {
-        matcher: subdomainMatcher,
-        component: PublicProfileComponent
-    },
     { path: 'profile/:slug', component: PublicProfileComponent },
     { path: '', component: LandingComponent },
     { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
     { path: 'login-success', loadComponent: () => import('./components/landing/landing').then(m => m.LandingComponent) }, // Temporary handler logic in landing or specific component
+    {
+        matcher: subdomainMatcher,
+        component: PublicProfileComponent
+    },
 ];
