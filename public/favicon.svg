@@ -1,0 +1,5 @@
+<svg width="50" height="60" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
+  <rect x="5" y="10" width="40" height="40" rx="8" fill="#2563eb"/>
+  <text x="12" y="38" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">CV</text>
+  <rect x="55" y="45" width="20" height="3" rx="1.5" fill="#2563eb"/>
+</svg>
