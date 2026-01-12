@@ -39,11 +39,11 @@ export function subdomainMatcher(url: UrlSegment[]) {
 
 export const routes: Routes = [
     { path: 'profile/:slug', component: PublicProfileComponent },
-    { path: '', component: LandingComponent },
     { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
     { path: 'login-success', loadComponent: () => import('./components/landing/landing').then(m => m.LandingComponent) }, // Temporary handler logic in landing or specific component
     {
         matcher: subdomainMatcher,
         component: PublicProfileComponent
     },
+    { path: '', component: LandingComponent },
 ];
