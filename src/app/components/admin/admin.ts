@@ -108,7 +108,7 @@ export class AdminComponent implements OnInit {
       else if (val.includes('github')) type = 'github';
       else if (val.includes('twitter') || val.includes('x.com')) type = 'twitter';
       else if (val.includes('instagram')) type = 'instagram';
-      else if (val.includes('@')) type = 'email';
+      else if (val.includes('@')) type = 'at';
       else if (val.includes('http')) type = 'website';
 
       this.formData.contacts.push({ type, value: val, icon: type });

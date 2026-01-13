@@ -18,12 +18,18 @@
                     <!-- Contacts Block -->
                     <div class="mt-6 flex flex-wrap gap-4">
                         @for(contact of profile()?.contacts; track contact) {
-                        <a [href]="contact.value" target="_blank"
-                            class="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-gray-700">
-                            <!-- Simple Icon Logic (can be improved with SVG) -->
-                            <span class="font-bold text-xs uppercase">{{ contact.type }}</span>
-                            <span class="text-sm font-medium">Link</span>
+                        @if(contact.type === 'at') {
+                        <a [href]="'mailto:' + contact.value" target="_blank"
+                            class="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-gray-700">
+                            <i [class]="'fa-brands fa-' + contact.type"></i>
                         </a>
+                        }
+                        @else {
+                        <a [href]="contact.value" target="_blank"
+                            class="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-gray-700">
+                            <i [class]="'fa-brands fa-' + contact.type"></i>
+                        </a>
+                        }
                         }
                         @if(!profile()?.contacts?.length) {
                         <div class="text-gray-400 italic text-sm">No contacts added.</div>
@@ -55,8 +61,8 @@
                             <div class="mt-4 flex gap-2 flex-wrap">
                                 @for(contact of profile()?.contacts; track contact) {
                                 <a [href]="contact.value" target="_blank"
-                                    class="px-4 py-1.5 border border-gray-300 text-gray-600 font-semibold rounded-full hover:bg-gray-50 transition text-sm flex items-center gap-2">
-                                    <span>{{ contact.type }}</span>
+                                    class="px-4 py-1.5 border border-gray-300 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition text-sm flex items-center gap-2">
+                                    <i [class]="'fa-brands fa-' + contact.type"></i>
                                 </a>
                                 }
                                 @if(!profile()?.contacts?.length) {

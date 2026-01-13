@@ -136,15 +136,18 @@
                             class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">Add</button>
                     </div>
 
-                    <div *ngFor="let contact of formData.contacts; let i = index"
-                        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+                    @for(contact of formData.contacts; track $index; let i = $index) {
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
                         <div class="flex items-center gap-3">
-                            <span class="text-xs uppercase font-bold text-gray-500 w-16">{{ contact.type }}</span>
+                            <span class="text-md uppercase font-bold text-gray-500 w-16">
+                                <i [class]="'fa-brands fa-' + contact.type"></i>
+                            </span>
                             <span class="text-gray-900">{{ contact.value }}</span>
                         </div>
                         <button (click)="removeContact(i)"
                             class="text-red-500 hover:text-red-700 text-sm">Remove</button>
                     </div>
+                    }
                 </div>
             </div>
             }
@@ -152,8 +155,8 @@
             <!-- Experience Tab -->
             @if(activeTab === 'experience') {
             <div class="space-y-6">
-                <div *ngFor="let exp of formData.experience; let i = index"
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative">
+                @for(exp of formData.experience; track $index; let i = $index) {
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative">
                     <button (click)="removeExperience(i)"
                         class="absolute top-4 right-4 text-red-500 hover:text-red-700 text-sm">Remove</button>
                     <div class="grid grid-cols-2 gap-4">
@@ -184,6 +187,7 @@
                         </div>
                     </div>
                 </div>
+                }
                 <button (click)="addExperience()"
                     class="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-blue-500 hover:text-blue-500 font-medium transition">+
                     Add Position</button>
