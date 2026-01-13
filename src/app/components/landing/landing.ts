@@ -26,7 +26,7 @@ export class LandingComponent implements OnInit {
       description: 'O\'zingiz uchun ism.cvme.uz ko\'rinishidagi bepul vizitka sayt va onlayn portfolio yarating. Dasturchilar va mutaxassislar uchun eng qulay tanlov!',
       h1: 'Shaxsiy brendingizni bitta linkda birlashtiring',
       p: 'ism.cvme.uz ko\'rinishidagi shaxsiy subdomen, zamonaviy dizayn va cheksiz imkoniyatlar. Portfolio yaratish endi juda oson.',
-      cta: 'O\'z sahifangizni yarating',
+      cta: 'Google orqali kirish',
       faqTitle: 'Ko\'p so\'raladigan savollar',
       faqs: [
         { q: 'Subdomen olish uchun pul to\'lash kerakmi?', a: 'Yo\'q, ismingiz.cvme.uz formatidagi subdomen har doim bepul bo\'lib qoladi.' },
@@ -38,7 +38,7 @@ export class LandingComponent implements OnInit {
       description: 'Создайте персональный сайт-визитку и онлайн портфолио бесплатно на домене cvme.uz. Идеально для разработчиков и фрилансеров.',
       h1: 'Ваше портфолио теперь на вашем личном субдомене',
       p: 'Получите адрес вида имя.cvme.uz и покажите свои проекты миру. Быстро, стильно и полностью бесплатно.',
-      cta: 'Создать профиль сейчас',
+      cta: 'Продолжить через Google',
       faqTitle: 'Вопросы и ответы',
       faqs: [
         { q: 'Нужно ли знать программирование?', a: 'Нет, создание вашей страницы занимает 10 секунд и не требует навыков кодинга.' },
@@ -50,7 +50,7 @@ export class LandingComponent implements OnInit {
       description: 'Build your personal landing page and online portfolio for free. Get your own name.cvme.uz subdomain in seconds.',
       h1: 'Everything you are, in one simple link',
       p: 'Claim your professional name.cvme.uz subdomain. The ultimate portfolio builder for developers, designers, and creators.',
-      cta: 'Claim your subdomain',
+      cta: 'Continue via Google',
       faqTitle: 'Common Questions',
       faqs: [
         { q: 'How do I share my digital card?', a: 'Once created, simply copy your unique link (name.cvme.uz) and paste it into your social bio or CV.' },
