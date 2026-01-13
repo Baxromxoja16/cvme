@@ -131,10 +131,8 @@ export class AdminComponent implements OnInit {
 
   get liveUrl() {
     const slug = this.formData.slug;
-    console.log(slug);
     if (!slug) return '#';
     // In production use base domain, in dev use localhost with subdomain
-    console.log(environment.production, slug, environment.baseDomain);
     if (environment.production) {
       return `https://${slug}.${environment.baseDomain}`;
     }

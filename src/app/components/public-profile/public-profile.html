@@ -6,10 +6,10 @@
             <div class="container mx-auto max-w-4xl mt-6 px-4">
 
                 <!-- Minimalist Header (No Avatar or Inactive) -->
-                <div *ngIf="!profile()?.profile?.avatar || profile()?.profile?.avatarActive === false"
-                    class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-4">
-                    <h1 class="text-5xl font-bold text-gray-900 tracking-tight">{{ profile()?.profile?.header || 'Your
-                        Name'
+                @if(!profile()?.profile?.avatar || profile()?.profile?.avatarActive === false) {
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-4">
+                    <h1 class="text-5xl font-bold text-gray-900 tracking-tight">{{ profile()?.profile?.header ||
+                        'YourName'
                         }}</h1>
                     <p class="text-xl text-gray-600 mt-2 font-light">
                         {{ profile()?.profile?.about || 'Professional headline goes here.' }}
@@ -17,21 +17,23 @@
 
                     <!-- Contacts Block -->
                     <div class="mt-6 flex flex-wrap gap-4">
-                        <a *ngFor="let contact of profile()?.contacts" [href]="contact.value" target="_blank"
+                        @for(contact of profile()?.contacts; track contact) {
+                        <a [href]="contact.value" target="_blank"
                             class="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-gray-700">
                             <!-- Simple Icon Logic (can be improved with SVG) -->
                             <span class="font-bold text-xs uppercase">{{ contact.type }}</span>
                             <span class="text-sm font-medium">Link</span>
                         </a>
-                        <div *ngIf="!profile()?.contacts?.length" class="text-gray-400 italic text-sm">No contacts
-                            added.
-                        </div>
+                        }
+                        @if(!profile()?.contacts?.length) {
+                        <div class="text-gray-400 italic text-sm">No contacts added.</div>
+                        }
                     </div>
                 </div>
-
+                }
                 <!-- LinkedIn Header (With Avatar and Active) -->
-                <div *ngIf="profile()?.profile?.avatar && profile()?.profile?.avatarActive !== false"
-                    class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative mb-4">
+                @if(profile()?.profile?.avatar && profile()?.profile?.avatarActive !== false) {
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative mb-4">
                     <!-- Cover Image -->
                     <div class="h-48 bg-gradient-to-r from-blue-300 to-slate-300 relative"></div>
 
@@ -51,23 +53,28 @@
 
                             <!-- Profile Contacts -->
                             <div class="mt-4 flex gap-2 flex-wrap">
-                                <a *ngFor="let contact of profile()?.contacts" [href]="contact.value" target="_blank"
+                                @for(contact of profile()?.contacts; track contact) {
+                                <a [href]="contact.value" target="_blank"
                                     class="px-4 py-1.5 border border-gray-300 text-gray-600 font-semibold rounded-full hover:bg-gray-50 transition text-sm flex items-center gap-2">
                                     <span>{{ contact.type }}</span>
                                 </a>
-                                <a *ngIf="!profile()?.contacts?.length" href="#"
+                                }
+                                @if(!profile()?.contacts?.length) {
+                                <a href="#"
                                     class="px-6 py-1.5 bg-[#0A66C2] text-white font-semibold rounded-full hover:bg-[#004182] transition">Connect</a>
+                                }
                             </div>
                         </div>
                     </div>
                 </div>
+                }
 
                 <!-- Experience Section -->
-                <div *ngIf="profile()?.experience?.length"
-                    class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
+                @if(profile()?.experience?.length) {
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Experience</h2>
-                    <div *ngFor="let exp of profile()?.experience"
-                        class="mb-4 last:mb-0 border-b last:border-0 border-gray-100 pb-4 last:pb-0">
+                    @for(exp of profile()?.experience; track exp) {
+                    <div class="mb-4 last:mb-0 border-b last:border-0 border-gray-100 pb-4 last:pb-0">
                         <h3 class="font-semibold text-lg">{{ exp.position }}</h3>
                         <p class="text-sm text-gray-600">{{ exp.company }}</p>
                         <p class="text-xs text-gray-500 mt-1">
@@ -77,31 +84,43 @@
                         </p>
                         <p class="text-sm text-gray-700 mt-2">{{ exp.description }}</p>
                     </div>
+                    }
                 </div>
+                }
 
                 <!-- Education Section -->
-                <div *ngIf="profile()?.education?.length"
-                    class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
+                @if(profile()?.education?.length) {
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Education</h2>
-                    <div *ngFor="let edu of profile()?.education" class="mb-4 last:mb-0">
+                    @for(edu of profile()?.education; track edu) {
+                    <div class="mb-4 last:mb-0 border-b last:border-0 border-gray-100 pb-4 last:pb-0">
                         <h3 class="font-semibold text-lg">{{ edu.institution }}</h3>
                         <p class="text-sm text-gray-600">{{ edu.degree }}</p>
-                        <p class="text-xs text-gray-500">{{ edu.year }}</p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{ edu.startDate | date:'MMM yyyy' }} - {{ edu.endDate ? (edu.endDate | date:'MMM yyyy') :
+                            'Present'
+                            }}
+                        </p>
+                        <p class="text-sm text-gray-700 mt-2">{{ edu.description }}</p>
                     </div>
+                    }
                 </div>
+                }
 
                 <!-- Skills Section -->
-                <div *ngIf="profile()?.skills?.length"
-                    class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
+                @if(profile()?.skills?.length) {
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Skills</h2>
                     <div class="flex flex-wrap gap-2">
-                        <span *ngFor="let skill of profile()?.skills"
+                        @for(skill of profile()?.skills; track skill) {
+                        <span
                             class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition">
                             {{ skill }}
                         </span>
+                        }
                     </div>
                 </div>
-
+                }
             </div>
 
             <footer class="text-center py-6 text-xs text-gray-500">
@@ -109,13 +128,15 @@
             </footer>
         </div>
 
-        <div *ngIf="!profile() && profileService.loading()" class="min-h-screen flex items-center justify-center">
+        @if(!profile() && profileService.loading()) {
+        <div class="min-h-screen flex items-center justify-center">
             <div class="animate-pulse flex flex-col items-center">
                 <div class="h-32 w-32 bg-gray-300 rounded-full mb-4"></div>
                 <div class="h-4 w-48 bg-gray-300 rounded mb-2"></div>
                 <div class="h-4 w-32 bg-gray-300 rounded"></div>
             </div>
         </div>
+        }
     </div>
 </div>
 }
