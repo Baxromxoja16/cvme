@@ -1,20 +1,44 @@
-<div class="min-h-screen flex flex-col items-center justify-center bg-white text-center px-4">
-    <div class="max-w-2xl">
-
-        <div class="flex justify-center mb-4">
-            <img src="/logoo.svg" alt="" class="rounded-lg">
+<div class="min-h-screen flex flex-col items-center bg-white px-4">
+    <!-- Header/Nav -->
+    <div class="w-full max-w-6xl flex justify-between items-center py-6">
+        <img src="/logoo.svg" alt="CVME Logo" class="h-8">
+        <div class="flex gap-4 text-sm font-medium text-gray-500">
+            <a href="/uz" [class.text-blue-600]="currentLang() === 'uz'">O'zbek</a>
+            <a href="/ru" [class.text-blue-600]="currentLang() === 'ru'">Русский</a>
+            <a href="/en" [class.text-blue-600]="currentLang() === 'en'">English</a>
         </div>
+    </div>
 
-        <h1 class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 mb-6">
-            Create your Professional vCard
+    <div class="flex-1 flex flex-col items-center justify-center text-center max-w-2xl py-20" *ngIf="content()">
+        <h1
+            class="text-4xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 leading-tight">
+            {{ content().h1 }}
         </h1>
-        <p class="text-xl text-gray-600 mb-8">
-            Minimalist, LinkedIn-style personal websites. Your own subdomain, your own brand.
+        <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+            {{ content().p }}
         </p>
 
         <button (click)="login()"
-            class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition transform hover:-translate-y-1">
-            Get Started with Google
+            class="px-10 py-4 bg-blue-600 text-white font-bold rounded-xl shadow-xl hover:bg-blue-700 transition transform hover:-translate-y-1 active:scale-95">
+            {{ content().cta }}
         </button>
     </div>
+
+    <!-- FAQ Section -->
+    <div class="w-full max-w-3xl py-20 border-t border-gray-100" *ngIf="content()">
+        <h2 class="text-3xl font-bold text-gray-800 text-center mb-12">{{ content().faqTitle }}</h2>
+        <div class="space-y-6">
+            @for (faq of content().faqs; track $index) {
+            <div class="bg-gray-50 rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ faq.q }}</h3>
+                <p class="text-gray-600">{{ faq.a }}</p>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-6xl py-10 text-center text-gray-400 text-sm">
+        © 2026 CVME.UZ - Personal vCard & Portfolio Builder
+    </footer>
 </div>

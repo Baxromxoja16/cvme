@@ -40,10 +40,14 @@ export function subdomainMatcher(url: UrlSegment[]) {
 export const routes: Routes = [
     { path: 'profile/:slug', component: PublicProfileComponent },
     { path: 'admin', canActivate: [authGuard], children: adminRoutes },
-    { path: 'login-success', loadComponent: () => import('./components/landing/landing').then(m => m.LandingComponent) }, // Temporary handler logic in landing or specific component
+    { path: 'login-success', loadComponent: () => import('./components/landing/landing').then(m => m.LandingComponent) },
     {
         matcher: subdomainMatcher,
         component: PublicProfileComponent
     },
-    { path: '', component: LandingComponent },
+    { path: 'uz', component: LandingComponent },
+    { path: 'ru', component: LandingComponent },
+    { path: 'en', component: LandingComponent },
+    { path: 'blog/:slug', loadComponent: () => import('./components/blog/blog').then(m => m.BlogComponent) },
+    { path: '', redirectTo: 'uz', pathMatch: 'full' },
 ];
