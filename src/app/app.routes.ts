@@ -49,5 +49,5 @@ export const routes: Routes = [
     { path: 'ru', component: LandingComponent },
     { path: 'en', component: LandingComponent },
     { path: 'blog/:slug', loadComponent: () => import('./components/blog/blog').then(m => m.BlogComponent) },
-    { path: '', redirectTo: 'uz', pathMatch: 'full' },
+    { path: '', redirectTo: 'en', pathMatch: 'full' },
 ];

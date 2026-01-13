@@ -18,7 +18,7 @@ export class LandingComponent implements OnInit {
   metaService = inject(Meta);
 
   content = signal<any>(null);
-  currentLang = signal<string>('uz');
+  currentLang = signal<string>('en');
 
   translations: any = {
     uz: {
@@ -62,7 +62,7 @@ export class LandingComponent implements OnInit {
   ngOnInit() {
     // Detect language from path
     const path = window.location.pathname.split('/')[1];
-    const lang = this.translations[path] ? path : 'uz';
+    const lang = this.translations[path] ? path : 'en';
     this.currentLang.set(lang);
     this.content.set(this.translations[lang]);
     this.updateSEO(lang);
