@@ -23,6 +23,16 @@ import { ProfileService } from '../../../services/profile';
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
         <div class="grid gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Username / Subdomain</label>
+            <div class="flex items-center gap-2">
+              <input type="text" [(ngModel)]="formData.slug" (ngModelChange)="onSlugChange($event)"
+                  class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="yourname">
+              <span class="text-gray-500 text-sm">.cvme.uz</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Only letters, numbers, and hyphens allowed.</p>
+          </div>
           @if(profile().profile) {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -65,6 +75,19 @@ export class ProfileTabComponent implements OnInit {
 
   ngOnInit() {
     this.loadProfile();
+  }
+
+  onSlugChange(value: string) {
+    if (!value) return;
+    this.formData.slug = value
+      .toLowerCase()
+      .trim()
+      .replace(/\./g, '-')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
   }
 
   loadProfile() {
