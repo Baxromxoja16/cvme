@@ -22,39 +22,39 @@ export class LandingComponent implements OnInit {
 
   translations: any = {
     uz: {
-      title: 'Onlayn vizitka yaratish — Shaxsiy portfoliongizni 10 soniyada yarating',
-      description: 'Qog\'oz vizitkalarni unuting. Shaxsiy portfolio va vizitkangizni bepul yarating. Uz domeni va tayyor shablon!',
-      h1: 'Onlayn vizitka yaratish — Shaxsiy portfoliongizni 10 soniyada yarating',
-      p: 'Digital tashrif qog\'ozingiz va shaxsiy brendingiz uchun yagona platforma. Beul vizitka sayt va shaxsiy subdomain.',
-      cta: 'Google orqali boshlash',
-      faqTitle: 'Ko\'p beriladigan savollar',
+      title: 'Sizning ismingiz — Sizning brendingiz | Ism.cvme.uz da shaxsiy sayt',
+      description: 'O\'zingiz uchun ism.cvme.uz ko\'rinishidagi bepul vizitka sayt va onlayn portfolio yarating. Dasturchilar va mutaxassislar uchun eng qulay tanlov!',
+      h1: 'Shaxsiy brendingizni bitta linkda birlashtiring',
+      p: 'Ism.cvme.uz ko\'rinishidagi shaxsiy subdomen, zamonaviy dizayn va cheksiz imkoniyatlar. Portfolio yaratish endi juda oson.',
+      cta: 'O\'z sahifangizni yarating',
+      faqTitle: 'Ko\'p so\'raladigan savollar',
       faqs: [
-        { q: 'CVME.UZ da vizitka yaratish tekinmi?', a: 'Ha, asosiy funksiyalar va shaxsiy subdomain mutlaqo bepul.' },
-        // { q: 'QR kodli vizitkani qanday ulashish mumkin?', a: 'Saytingiz yaratilgach, QR kod avtomatik generatsiya bo\'ladi va uni skanerlash orqali kontaktlaringizni yubora olasiz.' }
+        { q: 'Subdomen olish uchun pul to\'lash kerakmi?', a: 'Yo\'q, ismingiz.cvme.uz formatidagi subdomen har doim bepul bo\'lib qoladi.' },
+        { q: 'Saytim Googleda chiqadimi?', a: 'Albatta! Bizning tizim har bir foydalanuvchi sahifasini qidiruv tizimlari uchun avtomatik optimallashtiradi.' }
       ]
     },
     ru: {
-      title: 'Создать визитку онлайн бесплатно — Конструктор цифрового портфолио',
-      description: 'Самый простой способ создать личный сайт-визитку. Твой домен, твоё портфолио, твой бренд. Попробуй сейчас!',
-      h1: 'Создать визитку онлайн бесплатно — Конструктор портфолио',
-      p: 'Персональная страница и цифровое резюме за 1 минуту. Личный домен и современный дизайн.',
-      cta: 'Начать через Google',
-      faqTitle: 'Часто задаваемые вопросы',
+      title: 'Твоё имя — Твой бренд | Личный сайт на Имя.cvme.uz',
+      description: 'Создайте персональный сайт-визитку и онлайн портфолио бесплатно на домене cvme.uz. Идеально для разработчиков и фрилансеров.',
+      h1: 'Ваше портфолио теперь на вашем личном субдомене',
+      p: 'Получите адрес вида имя.cvme.uz и покажите свои проекты миру. Быстро, стильно и полностью бесплатно.',
+      cta: 'Создать профиль сейчас',
+      faqTitle: 'Вопросы и ответы',
       faqs: [
-        { q: 'Как получить свой домен вида имя.cvme.uz?', a: 'Просто зарегистрируйтесь и выберите любой свободный логин — ваш сайт будет готов мгновенно.' },
-        // { q: 'Работает ли визитка на мобильных телефонах?', a: 'Да, все сайты CVME.UZ полностью адаптивны и отлично выглядят на любых устройствах.' }
+        { q: 'Нужно ли знать программирование?', a: 'Нет, создание вашей страницы занимает 10 секунд и не требует навыков кодинга.' },
+        { q: 'Можно ли использовать это как Link in Bio?', a: 'Да, cvme.uz — это лучшая и более профессиональная альтернатива Linktree для Instagram и Telegram.' }
       ]
     },
     en: {
-      title: 'Digital Business Card Maker — Build Your Online Portfolio in Seconds',
-      description: 'Create your personal landing page in seconds. Better than a link-in-bio. Your own subdomain. Start for free.',
-      h1: 'Digital Business Card Maker — Build Your Portfolio',
-      p: 'The minimalist platform for your personal brand and digital presence. Custom Subdomain and Pro Templates.',
-      cta: 'Get Started with Google',
-      faqTitle: 'Frequently Asked Questions',
+      title: 'Your Name is Your Brand | Personal Site at Name.cvme.uz',
+      description: 'Build your personal landing page and online portfolio for free. Get your own name.cvme.uz subdomain in seconds.',
+      h1: 'Everything you are, in one simple link',
+      p: 'Claim your professional name.cvme.uz subdomain. The ultimate portfolio builder for developers, designers, and creators.',
+      cta: 'Claim your subdomain',
+      faqTitle: 'Common Questions',
       faqs: [
-        { q: 'Is it really free to create a digital vCard?', a: 'Yes, our core features including custom subdomains are free for everyone.' },
-        // { q: 'Can I use CVME for my Instagram Link in Bio?', a: 'Absolutely! CVME is designed to be the perfect landing page for your social profile links.' }
+        { q: 'How do I share my digital card?', a: 'Once created, simply copy your unique link (name.cvme.uz) and paste it into your social bio or CV.' },
+        { q: 'Is it mobile friendly?', a: 'Yes, every CVME page is perfectly optimized for all devices and screen sizes.' }
       ]
     }
   };
