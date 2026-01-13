@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ProfileService } from '../../../services/profile';
 
@@ -31,8 +32,22 @@ import { ProfileService } from '../../../services/profile';
                   placeholder="yourname">
               <span class="text-gray-500 text-sm">.cvme.uz</span>
             </div>
-            <p class="text-xs text-gray-400 mt-1">Only letters, numbers, and hyphens allowed.</p>
+            
+            <div class="mt-1 flex items-center justify-between">
+                <p class="text-xs text-gray-400">Only letters, numbers, and hyphens allowed.</p>
+                
+                @if (slugStatus() === 'checking') {
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
+                        <i class="fas fa-spinner fa-spin"></i> Checking...
+                    </span>
+                } @else if (slugStatus() === 'available') {
+                    <span class="text-xs text-green-600 font-medium">Available</span>
+                } @else if (slugStatus() === 'taken') {
+                    <span class="text-xs text-red-600 font-medium">Username is taken</span>
+                }
+            </div>
           </div>
+
           @if(profile().profile) {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -72,14 +87,41 @@ export class ProfileTabComponent implements OnInit {
 
   formData: any = {};
   profile = this.profileService.currentProfile;
+  slugStatus = signal<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  private slugSubject = new Subject<string>();
+  private originalSlug = '';
 
   ngOnInit() {
     this.loadProfile();
+
+    this.slugSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(slug => {
+      if (!slug || slug === this.originalSlug) {
+        this.slugStatus.set('idle');
+        return;
+      }
+
+      this.slugStatus.set('checking');
+      this.profileService.checkSlugAvailability(slug).subscribe({
+        next: (res) => {
+          this.slugStatus.set(res.available ? 'available' : 'taken');
+        },
+        error: () => this.slugStatus.set('idle')
+      });
+    });
   }
 
   onSlugChange(value: string) {
-    if (!value) return;
-    this.formData.slug = value
+    if (!value) {
+      this.formData.slug = '';
+      this.slugStatus.set('idle');
+      return;
+    }
+
+    const sanitized = value
       .toLowerCase()
       .trim()
       .replace(/\./g, '-')
@@ -88,6 +130,9 @@ export class ProfileTabComponent implements OnInit {
       .replace(/-+/g, '-')
       .replace(/^-+/, '')
       .replace(/-+$/, '');
+    
+    this.formData.slug = sanitized;
+    this.slugSubject.next(sanitized);
   }
 
   loadProfile() {
@@ -97,6 +142,7 @@ export class ProfileTabComponent implements OnInit {
       next: (data: any) => {
         this.formData = JSON.parse(JSON.stringify(data));
         this.profile.set(data);
+        this.originalSlug = data.slug;
       },
       error: (err) => console.error(err)
     });
@@ -106,11 +152,16 @@ export class ProfileTabComponent implements OnInit {
     this.profileService.updateProfile(this.formData)
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
-      next: (data) => {
+      next: (data: any) => {
         this.profile.set(data);
-        alert('Profile Saved!');
+        this.originalSlug = data.slug;
+        this.slugStatus.set('idle');
+        alert('Profile saved!');
       },
-      error: (err) => alert('Error saving')
+      error: (err) => {
+          const message = err?.message || 'Error saving';
+          alert(message);
+      }
     });
   }
 

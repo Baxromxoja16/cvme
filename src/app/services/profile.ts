@@ -63,4 +63,8 @@ export class ProfileService {
     formData.append('file', file);
     return this.http.post<{ url: string }>(`${this.profileUrl}/upload`, formData);
   }
+
+  checkSlugAvailability(slug: string) {
+    return this.http.get<{ available: boolean }>(`${this.usersUrl}/check-slug/${slug}`);
+  }
 }
