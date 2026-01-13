@@ -22,10 +22,10 @@ export class LandingComponent implements OnInit {
 
   translations: any = {
     uz: {
-      title: 'Sizning ismingiz — Sizning brendingiz | Ism.cvme.uz da shaxsiy sayt',
+      title: 'Sizning ismingiz — Sizning brendingiz | ism.cvme.uz da shaxsiy sayt',
       description: 'O\'zingiz uchun ism.cvme.uz ko\'rinishidagi bepul vizitka sayt va onlayn portfolio yarating. Dasturchilar va mutaxassislar uchun eng qulay tanlov!',
       h1: 'Shaxsiy brendingizni bitta linkda birlashtiring',
-      p: 'Ism.cvme.uz ko\'rinishidagi shaxsiy subdomen, zamonaviy dizayn va cheksiz imkoniyatlar. Portfolio yaratish endi juda oson.',
+      p: 'ism.cvme.uz ko\'rinishidagi shaxsiy subdomen, zamonaviy dizayn va cheksiz imkoniyatlar. Portfolio yaratish endi juda oson.',
       cta: 'O\'z sahifangizni yarating',
       faqTitle: 'Ko\'p so\'raladigan savollar',
       faqs: [
@@ -34,7 +34,7 @@ export class LandingComponent implements OnInit {
       ]
     },
     ru: {
-      title: 'Твоё имя — Твой бренд | Личный сайт на Имя.cvme.uz',
+      title: 'Твоё имя — Твой бренд | Личный сайт на имя.cvme.uz',
       description: 'Создайте персональный сайт-визитку и онлайн портфолио бесплатно на домене cvme.uz. Идеально для разработчиков и фрилансеров.',
       h1: 'Ваше портфолио теперь на вашем личном субдомене',
       p: 'Получите адрес вида имя.cvme.uz и покажите свои проекты миру. Быстро, стильно и полностью бесплатно.',
@@ -46,7 +46,7 @@ export class LandingComponent implements OnInit {
       ]
     },
     en: {
-      title: 'Your Name is Your Brand | Personal Site at Name.cvme.uz',
+      title: 'Your Name is Your Brand | Personal Site at name.cvme.uz',
       description: 'Build your personal landing page and online portfolio for free. Get your own name.cvme.uz subdomain in seconds.',
       h1: 'Everything you are, in one simple link',
       p: 'Claim your professional name.cvme.uz subdomain. The ultimate portfolio builder for developers, designers, and creators.',
