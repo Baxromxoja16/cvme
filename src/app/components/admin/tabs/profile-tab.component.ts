@@ -5,20 +5,17 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ProfileService } from '../../../services/profile';
+import { TabHeaderComponent } from '../tab-header.component';
 
 @Component({
   selector: 'app-profile-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TabHeaderComponent],
   template: `
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 capitalize">Edit Profile</h2>
-      <div class="flex gap-2">
-        <a [href]="liveUrl" target="_blank"
-            class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50">View Live</a>
-        <button (click)="save()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
-      </div>
-    </div>
+    <app-tab-header 
+      title="Edit Profile" 
+      (save)="save()">
+    </app-tab-header>
 
     <div class="space-y-6">
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -186,14 +183,5 @@ export class ProfileTabComponent implements OnInit {
       }
       this.formData.profile.avatarActive = !this.formData.profile.avatarActive;
     }
-  }
-
-  get liveUrl() {
-    const slug = this.formData.slug;
-    if (!slug) return '#';
-    if (environment.production) {
-      return `https://${slug}.${environment.baseDomain}`;
-    }
-    return `http://${slug}.localhost:4200`;
   }
 }

@@ -2,22 +2,19 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../../environments/environment';
 import { ExperienceService } from '../../../services/experience.service';
 import { ProfileService } from '../../../services/profile';
+import { TabHeaderComponent } from '../tab-header.component';
 
 @Component({
   selector: 'app-experience-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TabHeaderComponent],
   template: `
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 capitalize">Edit Experience</h2>
-      <div class="flex gap-2">
-        <a [href]="liveUrl" target="_blank"
-            class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50">View Live</a>
-      </div>
-    </div>
+    <app-tab-header 
+      title="Edit Experience" 
+      [showSave]="false">
+    </app-tab-header>
 
     <div class="space-y-6">
       @for(exp of experiences(); track exp._id) {
@@ -134,14 +131,5 @@ export class ExperienceTabComponent implements OnInit {
       },
       error: (err) => alert('Error removing experience')
     });
-  }
-
-  get liveUrl() {
-    const slug = this.profile()?.slug;
-    if (!slug) return '#';
-    if (environment.production) {
-      return `https://${slug}.${environment.baseDomain}`;
-    }
-    return `http://${slug}.localhost:4200`;
   }
 }
