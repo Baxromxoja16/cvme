@@ -1,7 +1,6 @@
-import { Injectable, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 
@@ -9,7 +8,8 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class ProfileService {
-  private apiUrl = `${environment.apiUrl}/users`;
+  private usersUrl = `${environment.apiUrl}/users`;
+  private profileUrl = `${environment.apiUrl}/profile`;
 
   // Signals for state
   currentProfile = signal<any>(null);
@@ -42,25 +42,25 @@ export class ProfileService {
       }
     }
 
-    return this.http.get(`${this.apiUrl}/public`, { headers });
+    return this.http.get(`${this.usersUrl}/public`, { headers });
   }
 
   getProfileBySlug(slug: string) {
     this.loading.set(true);
-    return this.http.get(`${this.apiUrl}/profile/${slug}`);
+    return this.http.get(`${this.usersUrl}/profile/${slug}`);
   }
 
   getMe() {
-    return this.http.get(`${this.apiUrl}/me`);
+    return this.http.get(this.profileUrl);
   }
 
   updateProfile(data: any) {
-    return this.http.patch(`${this.apiUrl}/me`, data);
+    return this.http.patch(this.profileUrl, data);
   }
 
   uploadFile(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<{ url: string }>(`${this.apiUrl}/upload`, formData);
+    return this.http.post<{ url: string }>(`${this.profileUrl}/upload`, formData);
   }
 }

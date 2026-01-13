@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { ProfileService } from '../../../services/profile';
+import { SkillsService } from '../../../services/skills.service';
 
 @Component({
   selector: 'app-skills-tab',
@@ -15,7 +16,6 @@ import { ProfileService } from '../../../services/profile';
       <div class="flex gap-2">
         <a [href]="liveUrl" target="_blank"
             class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50">View Live</a>
-        <button (click)="save()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
       </div>
     </div>
 
@@ -26,16 +26,16 @@ import { ProfileService } from '../../../services/profile';
           <input type="text" [(ngModel)]="skillInput" (keyup.enter)="addSkill()"
               class="flex-1 px-4 py-2 border rounded-lg outline-none focus:border-blue-500"
               placeholder="Type a skill and press Enter...">
-          <button (click)="addSkill()"
-              class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">Add</button>
+          <button (click)="addSkill()" [disabled]="!skillInput.trim()"
+              class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">Add</button>
         </div>
 
         <div class="flex flex-wrap gap-2">
-            @for(skill of profile().skills; track $index; let i = $index) {
+            @for(skill of skills(); track $index) {
             <span
                 class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium flex items-center gap-2">
                 {{ skill }}
-                <button (click)="removeSkill(i)" class="hover:text-blue-900">×</button>
+                <button (click)="removeSkill(skill)" class="hover:text-blue-900">×</button>
             </span>
             }
         </div>
@@ -45,54 +45,67 @@ import { ProfileService } from '../../../services/profile';
 })
 export class SkillsTabComponent implements OnInit {
   profileService = inject(ProfileService);
+  skillsService = inject(SkillsService);
   destroyRef = inject(DestroyRef);
 
-  formData: any = {};
   skillInput = '';
+  skills = signal<string[]>([]);
   profile = this.profileService.currentProfile;
 
   ngOnInit() {
-    this.loadProfile();
+    this.loadSkills();
   }
 
-  loadProfile() {
-    this.profileService.getMe()
+  loadSkills() {
+    this.skillsService.findAll()
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
-      next: (data: any) => {
-        this.formData = JSON.parse(JSON.stringify(data));
-        if (!this.formData.skills) this.formData.skills = [];
-        this.profile.set(data);
+      next: (data) => {
+        this.skills.set(data);
       },
       error: (err) => console.error(err)
     });
   }
 
-  save() {
-    this.profileService.updateProfile(this.formData)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (data) => {
-        this.profile.set(data);
-        alert('Profile Saved!');
-      },
-      error: (err) => alert('Error saving')
-    });
-  }
-
   addSkill() {
-    if (this.skillInput.trim()) {
-      this.formData.skills.push(this.skillInput.trim());
-      this.skillInput = '';
+    const skill = this.skillInput.trim();
+    if (skill) {
+      this.skillsService.add(skill)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedSkills) => {
+          this.skills.set(updatedSkills);
+          this.skillInput = '';
+          // Sync with profile service if needed
+          const p = this.profile();
+          if (p) {
+            p.skills = updatedSkills;
+            this.profile.set({...p});
+          }
+        },
+        error: (err) => alert('Error adding skill')
+      });
     }
   }
 
-  removeSkill(index: number) {
-    this.formData.skills.splice(index, 1);
+  removeSkill(skill: string) {
+    this.skillsService.remove(skill)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (updatedSkills) => {
+        this.skills.set(updatedSkills);
+        const p = this.profile();
+        if (p) {
+          p.skills = updatedSkills;
+          this.profile.set({...p});
+        }
+      },
+      error: (err) => alert('Error removing skill')
+    });
   }
 
   get liveUrl() {
-    const slug = this.formData.slug;
+    const slug = this.profile()?.slug;
     if (!slug) return '#';
     if (environment.production) {
       return `https://${slug}.${environment.baseDomain}`;

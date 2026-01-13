@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
+import { ContactsService } from '../../../services/contacts.service';
 import { ProfileService } from '../../../services/profile';
 
 @Component({
@@ -15,7 +16,6 @@ import { ProfileService } from '../../../services/profile';
       <div class="flex gap-2">
         <a [href]="liveUrl" target="_blank"
             class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50">View Live</a>
-        <button (click)="save()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
       </div>
     </div>
 
@@ -26,11 +26,11 @@ import { ProfileService } from '../../../services/profile';
           <input type="text" [(ngModel)]="contactInput" (keyup.enter)="addContact()"
               class="flex-1 px-4 py-2 border rounded-lg outline-none focus:border-blue-500"
               placeholder="e.g. https://t.me/username or user@example.com">
-          <button (click)="addContact()"
-              class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">Add</button>
+          <button (click)="addContact()" [disabled]="!contactInput.trim()"
+              class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">Add</button>
         </div>
 
-        @for(contact of profile().contacts; track $index; let i = $index) {
+        @for(contact of contacts(); track contact._id) {
         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
           <div class="flex items-center gap-3">
             <span class="text-md uppercase font-bold text-gray-500 w-16">
@@ -38,7 +38,7 @@ import { ProfileService } from '../../../services/profile';
             </span>
             <span class="text-gray-900">{{ contact.value }}</span>
           </div>
-          <button (click)="removeContact(i)"
+          <button (click)="removeContact(contact._id)"
               class="text-red-500 hover:text-red-700 text-sm">Remove</button>
         </div>
         }
@@ -48,38 +48,25 @@ import { ProfileService } from '../../../services/profile';
 })
 export class ContactsTabComponent implements OnInit {
   profileService = inject(ProfileService);
+  contactsService = inject(ContactsService);
   destroyRef = inject(DestroyRef);
 
-  formData: any = {};
   contactInput = '';
+  contacts = signal<any[]>([]);
   profile = this.profileService.currentProfile;
 
   ngOnInit() {
-    this.loadProfile();
+    this.loadContacts();
   }
 
-  loadProfile() {
-    this.profileService.getMe()
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (data: any) => {
-        this.formData = JSON.parse(JSON.stringify(data));
-        if (!this.formData.contacts) this.formData.contacts = [];
-        this.profile.set(data);
-      },
-      error: (err) => console.error(err)
-    });
-  }
-
-  save() {
-    this.profileService.updateProfile(this.formData)
+  loadContacts() {
+    this.contactsService.findAll()
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: (data) => {
-        this.profile.set(data);
-        alert('Profile Saved!');
+        this.contacts.set(data);
       },
-      error: (err) => alert('Error saving')
+      error: (err) => console.error(err)
     });
   }
 
@@ -97,17 +84,41 @@ export class ContactsTabComponent implements OnInit {
       else if (val.includes('@')) type = 'at';
       else if (val.includes('http')) type = 'website';
 
-      this.formData.contacts.push({ type, value: val, icon: type });
-      this.contactInput = '';
+      this.contactsService.add({ type, value: val, icon: type })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updatedContacts) => {
+          this.contacts.set(updatedContacts);
+          this.contactInput = '';
+          const p = this.profile();
+          if (p) {
+            p.contacts = updatedContacts;
+            this.profile.set({...p});
+          }
+        },
+        error: (err) => alert('Error adding contact')
+      });
     }
   }
 
-  removeContact(index: number) {
-    this.formData.contacts.splice(index, 1);
+  removeContact(contactId: string) {
+    this.contactsService.remove(contactId)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (updatedContacts) => {
+        this.contacts.set(updatedContacts);
+        const p = this.profile();
+        if (p) {
+          p.contacts = updatedContacts;
+          this.profile.set({...p});
+        }
+      },
+      error: (err) => alert('Error removing contact')
+    });
   }
 
   get liveUrl() {
-    const slug = this.formData.slug;
+    const slug = this.profile()?.slug;
     if (!slug) return '#';
     if (environment.production) {
       return `https://${slug}.${environment.baseDomain}`;

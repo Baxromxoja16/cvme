@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
+import { ExperienceService } from '../../../services/experience.service';
 import { ProfileService } from '../../../services/profile';
 
 @Component({
@@ -15,40 +16,43 @@ import { ProfileService } from '../../../services/profile';
       <div class="flex gap-2">
         <a [href]="liveUrl" target="_blank"
             class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50">View Live</a>
-        <button (click)="save()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
       </div>
     </div>
 
     <div class="space-y-6">
-      @for(exp of profile().experience; track $index; let i = $index) {
+      @for(exp of experiences(); track exp._id) {
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative">
-        <button (click)="removeExperience(i)"
-            class="absolute top-4 right-4 text-red-500 hover:text-red-700 text-sm">Remove</button>
+        <div class="absolute top-4 right-4 flex gap-2">
+            <button (click)="saveExperience(exp)"
+                class="text-blue-500 hover:text-blue-700 text-sm font-medium">Save</button>
+            <button (click)="removeExperience(exp._id)"
+                class="text-red-500 hover:text-red-700 text-sm">Remove</button>
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
             <input type="text" [(ngModel)]="exp.company"
-                class="w-full px-3 py-2 border rounded-lg outline-none">
+                class="w-full px-3 py-2 border rounded-lg outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
             <input type="text" [(ngModel)]="exp.position"
-                class="w-full px-3 py-2 border rounded-lg outline-none">
+                class="w-full px-3 py-2 border rounded-lg outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-            <input type="date" [(ngModel)]="exp.startDate"
-                class="w-full px-3 py-2 border rounded-lg outline-none">
+            <input type="date" [ngModel]="exp.startDate | date:'yyyy-MM-dd'" (ngModelChange)="exp.startDate = $event"
+                class="w-full px-3 py-2 border rounded-lg outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-            <input type="date" [(ngModel)]="exp.endDate"
-                class="w-full px-3 py-2 border rounded-lg outline-none">
+            <input type="date" [ngModel]="exp.endDate | date:'yyyy-MM-dd'" (ngModelChange)="exp.endDate = $event"
+                class="w-full px-3 py-2 border rounded-lg outline-none focus:border-blue-500">
           </div>
           <div class="col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea [(ngModel)]="exp.description" rows="2"
-                class="w-full px-3 py-2 border rounded-lg outline-none"></textarea>
+                class="w-full px-3 py-2 border rounded-lg outline-none focus:border-blue-500"></textarea>
           </div>
         </div>
       </div>
@@ -60,50 +64,80 @@ import { ProfileService } from '../../../services/profile';
 })
 export class ExperienceTabComponent implements OnInit {
   profileService = inject(ProfileService);
+  experienceService = inject(ExperienceService);
   destroyRef = inject(DestroyRef);
 
-  formData: any = {};
+  experiences = signal<any[]>([]);
   profile = this.profileService.currentProfile;
 
   ngOnInit() {
-    this.loadProfile();
+    this.loadExperience();
   }
 
-  loadProfile() {
-    this.profileService.getMe()
+  loadExperience() {
+    this.experienceService.findAll()
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
-      next: (data: any) => {
-        this.formData = JSON.parse(JSON.stringify(data));
-        if (!this.formData.experience) this.formData.experience = [];
-        this.profile.set(data);
+      next: (data) => {
+        this.experiences.set(data);
       },
       error: (err) => console.error(err)
     });
   }
 
-  save() {
-    this.profileService.updateProfile(this.formData)
+  saveExperience(exp: any) {
+    this.experienceService.update(exp._id, exp)
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
-      next: (data) => {
-        this.profile.set(data);
-        alert('Profile Saved!');
+      next: (updatedExperiences) => {
+        this.experiences.set(updatedExperiences);
+        const p = this.profile();
+        if (p) {
+          p.experience = updatedExperiences;
+          this.profile.set({...p});
+        }
+        alert('Experience updated!');
       },
-      error: (err) => alert('Error saving')
+      error: (err) => alert('Error updating experience')
     });
   }
 
   addExperience() {
-    this.formData.experience.push({ company: '', position: '', startDate: '', endDate: '', description: '' });
+    const newExp = { company: 'New Company', position: 'New Position', startDate: new Date(), endDate: null, description: '' };
+    this.experienceService.add(newExp)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (updatedExperiences) => {
+        this.experiences.set(updatedExperiences);
+        const p = this.profile();
+        if (p) {
+          p.experience = updatedExperiences;
+          this.profile.set({...p});
+        }
+      },
+      error: (err) => alert('Error adding experience')
+    });
   }
 
-  removeExperience(index: number) {
-    this.formData.experience.splice(index, 1);
+  removeExperience(experienceId: string) {
+    if (!confirm('Are you sure?')) return;
+    this.experienceService.remove(experienceId)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (updatedExperiences) => {
+        this.experiences.set(updatedExperiences);
+        const p = this.profile();
+        if (p) {
+          p.experience = updatedExperiences;
+          this.profile.set({...p});
+        }
+      },
+      error: (err) => alert('Error removing experience')
+    });
   }
 
   get liveUrl() {
-    const slug = this.formData.slug;
+    const slug = this.profile()?.slug;
     if (!slug) return '#';
     if (environment.production) {
       return `https://${slug}.${environment.baseDomain}`;
