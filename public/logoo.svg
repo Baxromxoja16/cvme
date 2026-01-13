@@ -1,6 +1,6 @@
-<svg width="130" height="60" viewBox="0 0 130 60" xmlns="http://www.w3.org/2000/svg">
-  <text x="10" y="38" font-family="Segoe UI, Roboto, Helvetica" font-size="28" font-weight="800" fill="#1e293b">
+<svg viewBox="0 0 130 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <text x="10" y="38" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="900" fill="#1e293b">
     cvme<tspan fill="#2563eb">.uz</tspan>
   </text>
-  <rect x="10" y="45" width="20" height="3" rx="1.5" fill="#2563eb"/>
+  <rect x="10" y="45" width="20" height="4" rx="2" fill="#2563eb"/>
 </svg>
