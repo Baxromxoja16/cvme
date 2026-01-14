@@ -41,6 +41,8 @@ export const routes: Routes = [
     { path: 'profile/:slug', component: PublicProfileComponent },
     { path: 'admin', canActivate: [authGuard], children: adminRoutes },
     { path: 'login-success', loadComponent: () => import('./components/landing/landing').then(m => m.LandingComponent) },
+    { path: 'cv.pdf', loadComponent: () => import('./components/cv-viewer/cv-viewer.component').then(m => m.CvViewerComponent) },
+    { path: 'resume', redirectTo: 'cv.pdf', pathMatch: 'full' },
     {
         matcher: subdomainMatcher,
         component: PublicProfileComponent

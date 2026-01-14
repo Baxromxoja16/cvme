@@ -82,6 +82,26 @@ import { TemplateSwitcherComponent } from '../template-switcher.component';
                 </div>
               </div>
             </div>
+
+            <!-- <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Resume / CV (PDF, DOC, DOCX)</label>
+              <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300">
+                <div class="flex-1">
+                  @if (cvUrlControl.value) {
+                    <div class="flex items-center gap-2 mb-2">
+                      <i [class]="getCvIcon(cvUrlControl.value)" class="text-xl"></i>
+                      <a [href]="cvUrlControl.value" target="_blank" class="text-blue-600 hover:underline text-sm font-medium truncate">View Current CV</a>
+                      <button (click)="removeCv()" class="text-red-500 hover:text-red-700 ml-2" title="Remove CV">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <p class="text-gray-500 text-sm mb-2">No CV uploaded yet.</p>
+                  }
+                  <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" (change)="onCvSelected($event)" class="text-sm w-full text-gray-500">
+                </div>
+              </div>
+            </div> -->
           </ng-container>
         </div>
       </div>
@@ -107,7 +127,8 @@ export class ProfileTabComponent implements OnInit {
         header: [''],
         about: [''],
         avatar: [''],
-        avatarActive: [true]
+        avatarActive: [true],
+        cvUrl: ['']
       })
     });
   }
@@ -116,6 +137,7 @@ export class ProfileTabComponent implements OnInit {
   get profileGroup() { return this.form.get('profile') as FormGroup; }
   get avatarControl() { return this.profileGroup.get('avatar')!; }
   get avatarActiveControl() { return this.profileGroup.get('avatarActive')!; }
+  get cvUrlControl() { return this.profileGroup.get('cvUrl')!; }
 
   ngOnInit() {
     this.loadProfile();
@@ -136,9 +158,8 @@ export class ProfileTabComponent implements OnInit {
       }
       
       const sanitized = value.toLowerCase().trim()
-        .replace(/[^a-z0-9-]/g, '-'); // Simple sanitization for display if needed, but Reactive Forms usually handle validation. 
+        .replace(/[^a-z0-9-]/g, '-'); 
       
-      // If we want to auto-sanitize input:
       if (value !== sanitized) {
           this.form.get('slug')?.setValue(sanitized, { emitEvent: false });
       }
@@ -165,10 +186,9 @@ export class ProfileTabComponent implements OnInit {
     .subscribe({
       next: (data: any) => {
         this.form.patchValue(data);
-        // Handle nested or missing fields if necessary
         if (!data.profile) {
              this.form.get('profile')?.patchValue({
-                 header: '', about: '', avatar: '', avatarActive: true
+                 header: '', about: '', avatar: '', avatarActive: true, cvUrl: ''
              });
         }
         this.profile.set(data);
@@ -220,5 +240,49 @@ export class ProfileTabComponent implements OnInit {
     const current = this.avatarActiveControl.value;
     this.avatarActiveControl.setValue(!current);
     this.avatarActiveControl.markAsDirty();
+  }
+
+  onCvSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      const allowedTypes = [
+          'application/pdf', 
+          'application/msword', 
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      // Simple extension check as fallback
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      const allowedExts = ['pdf', 'doc', 'docx'];
+
+      if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext || '')) {
+          this.toastService.error('Only PDF, DOC, and DOCX files are allowed');
+          return;
+      }
+
+      this.profileService.uploadFile(file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          const url = `${environment.fileUrl}${res.url}`;
+          this.cvUrlControl.setValue(url);
+          this.cvUrlControl.markAsDirty();
+          this.toastService.success('CV uploaded successfully');
+        },
+        error: () => this.toastService.error('Error uploading CV')
+      });
+    }
+  }
+
+  removeCv() {
+      this.cvUrlControl.setValue('');
+      this.cvUrlControl.markAsDirty();
+  }
+
+  getCvIcon(url: string): string {
+      if (!url) return 'fas fa-file';
+      if (url.endsWith('.pdf')) return 'fas fa-file-pdf text-red-500';
+      if (url.endsWith('.doc') || url.endsWith('.docs') || url.endsWith('.docx')) return 'fas fa-file-word text-blue-500';
+      return 'fas fa-file text-gray-500';
   }
 }
