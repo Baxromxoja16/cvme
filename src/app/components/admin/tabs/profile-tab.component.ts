@@ -6,11 +6,12 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ProfileService } from '../../../services/profile';
 import { TabHeaderComponent } from '../tab-header.component';
+import { TemplateSwitcherComponent } from '../template-switcher.component';
 
 @Component({
   selector: 'app-profile-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, TabHeaderComponent],
+  imports: [CommonModule, FormsModule, TabHeaderComponent, TemplateSwitcherComponent],
   template: `
     <app-tab-header 
       title="Edit Profile" 
@@ -18,6 +19,14 @@ import { TabHeaderComponent } from '../tab-header.component';
     </app-tab-header>
 
     <div class="space-y-6">
+      <!-- Template Selection -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <app-template-switcher 
+          [selectedId]="formData.templateId" 
+          (selectionChange)="formData.templateId = $event">
+        </app-template-switcher>
+      </div>
+
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
         <div class="grid gap-4">

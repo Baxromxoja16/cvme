@@ -1,148 +1,28 @@
 @if(profile()) {
-<div class="min-h-screen bg-[#F3F2EF] font-sans pb-10">
-    <div class="container mx-auto max-w-4xl mt-6 px-4">
-
-        <div class="min-h-screen bg-[#F3F2EF] font-sans pb-10">
-            <div class="container mx-auto max-w-4xl mt-6 px-4">
-
-                <!-- Minimalist Header (No Avatar or Inactive) -->
-                @if(!profile()?.profile?.avatar || profile()?.profile?.avatarActive === false) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-4">
-                    <h1 class="text-5xl font-bold text-gray-900 tracking-tight">{{ profile()?.profile?.header ||
-                        'YourName'
-                        }}</h1>
-                    <p class="text-xl text-gray-600 mt-2 font-light">
-                        {{ profile()?.profile?.about || 'Professional headline goes here.' }}
-                    </p>
-
-                    <!-- Contacts Block -->
-                    <div class="mt-6 flex flex-wrap gap-4">
-                        @for(contact of profile()?.contacts; track contact) {
-                        @if(contact.type === 'at') {
-                        <a [href]="'mailto:' + contact.value" target="_blank"
-                            class="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-gray-700">
-                            <i [class]="'fa-brands fa-' + contact.type"></i>
-                        </a>
-                        }
-                        @else {
-                        <a [href]="contact.value" target="_blank"
-                            class="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-gray-700">
-                            <i [class]="'fa-brands fa-' + contact.type"></i>
-                        </a>
-                        }
-                        }
-                        @if(!profile()?.contacts?.length) {
-                        <div class="text-gray-400 italic text-sm">No contacts added.</div>
-                        }
-                    </div>
-                </div>
-                }
-                <!-- LinkedIn Header (With Avatar and Active) -->
-                @if(profile()?.profile?.avatar && profile()?.profile?.avatarActive !== false) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative mb-4">
-                    <!-- Cover Image -->
-                    <div class="h-48 bg-gradient-to-r from-blue-300 to-slate-300 relative"></div>
-
-                    <div class="px-6 pb-6 relative">
-                        <!-- Avatar -->
-                        <div class="absolute left-6" style="top: -144px;">
-                            <img [src]="profile()?.profile?.avatar" alt="Avatar"
-                                class="w-32 h-32 rounded-full border-4 border-white shadow-sm bg-white object-cover">
-                        </div>
-
-                        <div class="mt-20">
-                            <h1 class="text-2xl font-bold text-gray-900">{{ profile()?.profile?.header || 'Your Name' }}
-                            </h1>
-                            <p class="text-base text-gray-600 mt-1">
-                                {{ profile()?.profile?.about || 'Professional headline goes here.' }}
-                            </p>
-
-                            <!-- Profile Contacts -->
-                            <div class="mt-4 flex gap-2 flex-wrap">
-                                @for(contact of profile()?.contacts; track contact) {
-                                <a [href]="contact.value" target="_blank"
-                                    class="px-4 py-1.5 border border-gray-300 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition text-sm flex items-center gap-2">
-                                    <i [class]="'fa-brands fa-' + contact.type"></i>
-                                </a>
-                                }
-                                @if(!profile()?.contacts?.length) {
-                                <a href="#"
-                                    class="px-6 py-1.5 bg-[#0A66C2] text-white font-semibold rounded-full hover:bg-[#004182] transition">Connect</a>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                }
-
-                <!-- Experience Section -->
-                @if(profile()?.experience?.length) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Experience</h2>
-                    @for(exp of profile()?.experience; track exp) {
-                    <div class="mb-4 last:mb-0 border-b last:border-0 border-gray-100 pb-4 last:pb-0">
-                        <h3 class="font-semibold text-lg">{{ exp.position }}</h3>
-                        <p class="text-sm text-gray-600">{{ exp.company }}</p>
-                        <p class="text-xs text-gray-500 mt-1">
-                            {{ exp.startDate | date:'MMM yyyy' }} - {{ exp.endDate ? (exp.endDate | date:'MMM yyyy') :
-                            'Present'
-                            }}
-                        </p>
-                        <p class="text-sm text-gray-700 mt-2">{{ exp.description }}</p>
-                    </div>
-                    }
-                </div>
-                }
-
-                <!-- Education Section -->
-                @if(profile()?.education?.length) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Education</h2>
-                    @for(edu of profile()?.education; track edu) {
-                    <div class="mb-4 last:mb-0 border-b last:border-0 border-gray-100 pb-4 last:pb-0">
-                        <h3 class="font-semibold text-lg">{{ edu.institution }}</h3>
-                        <p class="text-sm text-gray-600">{{ edu.degree }}</p>
-                        <p class="text-xs text-gray-500 mt-1">
-                            {{ edu.startDate | date:'MMM yyyy' }} - {{ edu.endDate ? (edu.endDate | date:'MMM yyyy') :
-                            'Present'
-                            }}
-                        </p>
-                        <p class="text-sm text-gray-700 mt-2">{{ edu.description }}</p>
-                    </div>
-                    }
-                </div>
-                }
-
-                <!-- Skills Section -->
-                @if(profile()?.skills?.length) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Skills</h2>
-                    <div class="flex flex-wrap gap-2">
-                        @for(skill of profile()?.skills; track skill) {
-                        <span
-                            class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition">
-                            {{ skill }}
-                        </span>
-                        }
-                    </div>
-                </div>
-                }
-            </div>
-
-            <footer class="text-center py-6 text-xs text-gray-500">
-                <p>Created with <a href="http://localhost:4200" class="text-[#0A66C2] hover:underline">CVme</a></p>
-            </footer>
-        </div>
-
-        @if(!profile() && profileService.loading()) {
-        <div class="min-h-screen flex items-center justify-center">
-            <div class="animate-pulse flex flex-col items-center">
-                <div class="h-32 w-32 bg-gray-300 rounded-full mb-4"></div>
-                <div class="h-4 w-48 bg-gray-300 rounded mb-2"></div>
-                <div class="h-4 w-32 bg-gray-300 rounded"></div>
-            </div>
-        </div>
-        }
+@switch (profile()?.templateId) {
+@case ('minimalist') {
+<app-minimalist-template [user]="profile()"></app-minimalist-template>
+}
+@case ('tech-dark') {
+<app-tech-dark-template [user]="profile()"></app-tech-dark-template>
+}
+@case ('glassmorphism') {
+<app-glass-template [user]="profile()"></app-glass-template>
+}
+@default {
+<app-minimalist-template [user]="profile()"></app-minimalist-template>
+}
+}
+} @else if (profileService.loading()) {
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="animate-pulse flex flex-col items-center">
+        <div class="h-32 w-32 bg-gray-200 rounded-full mb-8"></div>
+        <div class="h-6 w-64 bg-gray-200 rounded-lg mb-4"></div>
+        <div class="h-4 w-48 bg-gray-200 rounded-lg"></div>
     </div>
+</div>
+} @else {
+<div class="min-h-screen flex items-center justify-center text-gray-400">
+    <p>Profile not found.</p>
 </div>
 }

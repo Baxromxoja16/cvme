@@ -4,11 +4,19 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { ProfileService } from '../../services/profile';
+import { GlassTemplateComponent } from '../templates/glass.component';
+import { MinimalistTemplateComponent } from '../templates/minimalist.component';
+import { TechDarkTemplateComponent } from '../templates/tech-dark.component';
 
 @Component({
   selector: 'app-public-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule, 
+    MinimalistTemplateComponent, 
+    TechDarkTemplateComponent, 
+    GlassTemplateComponent
+  ],
   templateUrl: './public-profile.html',
   styleUrl: './public-profile.css',
 })
