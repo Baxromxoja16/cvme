@@ -6,10 +6,10 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-white text-gray-900 font-sans py-20 px-6">
+    <div class="min-h-screen bg-white text-gray-900 font-sans py-10 px-6">
       <div class="max-w-2xl mx-auto">
         <!-- Header -->
-        <header class="text-center mb-16">
+        <header class="text-center mb-10">
           @if (user.profile.avatar && user.profile.avatarActive !== false) {
             <img [src]="user.profile.avatar" class="w-32 h-32 rounded-full mx-auto mb-6 object-cover shadow-sm border border-gray-100">
           }
@@ -18,7 +18,7 @@ import { Component, Input } from '@angular/core';
         </header>
 
         <!-- Social/Contacts -->
-        <div class="flex justify-center gap-4 mb-20 flex-wrap">
+        <div class="flex justify-center gap-4 mb-10 flex-wrap">
           @for (contact of user.contacts; track contact.value) {
             <a [href]="contact.value" target="_blank" 
                class="p-3 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors border border-gray-100">
@@ -29,7 +29,7 @@ import { Component, Input } from '@angular/core';
 
         <!-- Experience -->
         @if (user.experience?.length) {
-          <section class="mb-16">
+          <section class="mb-10">
             <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2">Experience</h2>
             <div class="space-y-10">
               @for (exp of user.experience; track exp.company) {
@@ -50,7 +50,7 @@ import { Component, Input } from '@angular/core';
 
         <!-- Skills -->
         @if (user.skills?.length) {
-          <section class="mb-16">
+          <section class="mb-10">
             <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2">Skills</h2>
             <div class="flex flex-wrap gap-2 text-sm">
               @for (skill of user.skills; track skill) {
@@ -62,7 +62,7 @@ import { Component, Input } from '@angular/core';
 
         <!-- Education -->
         @if (user.education?.length) {
-          <section class="mb-20">
+          <section class="mb-10">
             <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2">Education</h2>
             <div class="space-y-8">
               @for (edu of user.education; track edu.institution) {
