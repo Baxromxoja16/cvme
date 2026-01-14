@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ConfirmationService } from 'primeng/api';
 import { ContactsService } from '../../../services/contacts.service';
 import { ProfileService } from '../../../services/profile';
+import { ToastService } from '../../../services/toast.service';
 import { TabHeaderComponent } from '../tab-header.component';
 
 @Component({
   selector: 'app-contacts-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, TabHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, TabHeaderComponent],
   template: `
     <app-tab-header 
       title="Edit Contacts" 
@@ -20,10 +22,10 @@ import { TabHeaderComponent } from '../tab-header.component';
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold mb-4">Add Contacts</h3>
         <div class="flex gap-2 mb-6">
-          <input type="text" [(ngModel)]="contactInput" (keyup.enter)="addContact()"
-              class="flex-1 px-4 py-2 border rounded-lg outline-none focus:border-blue-500"
+          <input type="text" [formControl]="contactInput" (keyup.enter)="addContact()"
+              class="flex-1 px-4 py-2 border rounded-lg outline-none focus:border-blue-500 bg-white text-gray-900"
               placeholder="e.g. https://t.me/username or user@example.com">
-          <button (click)="addContact()" [disabled]="!contactInput.trim()"
+          <button (click)="addContact()" [disabled]="contactInput.invalid || !contactInput.value?.trim()"
               class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">Add</button>
         </div>
 
@@ -46,9 +48,11 @@ import { TabHeaderComponent } from '../tab-header.component';
 export class ContactsTabComponent implements OnInit {
   profileService = inject(ProfileService);
   contactsService = inject(ContactsService);
+  toastService = inject(ToastService);
+  confirmationService = inject(ConfirmationService);
   destroyRef = inject(DestroyRef);
 
-  contactInput = '';
+  contactInput = new FormControl('', Validators.required);
   contacts = signal<any[]>([]);
   profile = this.profileService.currentProfile;
 
@@ -68,8 +72,8 @@ export class ContactsTabComponent implements OnInit {
   }
 
   addContact() {
-    if (this.contactInput.trim()) {
-      const val = this.contactInput.trim();
+    if (this.contactInput.valid && this.contactInput.value?.trim()) {
+      const val = this.contactInput.value.trim();
       let type = 'link';
       let icon = 'link';
 
@@ -86,31 +90,40 @@ export class ContactsTabComponent implements OnInit {
       .subscribe({
         next: (updatedContacts) => {
           this.contacts.set(updatedContacts);
-          this.contactInput = '';
+          this.contactInput.reset();
           const p = this.profile();
           if (p) {
             p.contacts = updatedContacts;
             this.profile.set({...p});
           }
+          this.toastService.success('Contact added');
         },
-        error: (err) => alert('Error adding contact')
+        error: (err) => this.toastService.error('Error adding contact')
       });
     }
   }
 
   removeContact(contactId: string) {
-    this.contactsService.remove(contactId)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (updatedContacts) => {
-        this.contacts.set(updatedContacts);
-        const p = this.profile();
-        if (p) {
-          p.contacts = updatedContacts;
-          this.profile.set({...p});
+    this.confirmationService.confirm({
+        message: 'Are you sure you want to delete this contact?',
+        header: 'Confirm Delete',
+        icon: 'pi pi-info-circle',
+        accept: () => {
+            this.contactsService.remove(contactId)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (updatedContacts) => {
+                this.contacts.set(updatedContacts);
+                const p = this.profile();
+                if (p) {
+                  p.contacts = updatedContacts;
+                  this.profile.set({...p});
+                }
+                this.toastService.success('Contact removed');
+              },
+              error: (err) => this.toastService.error('Error removing contact')
+            });
         }
-      },
-      error: (err) => alert('Error removing contact')
     });
   }
 }

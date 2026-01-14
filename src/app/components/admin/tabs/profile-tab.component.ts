@@ -1,29 +1,30 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ProfileService } from '../../../services/profile';
+import { ToastService } from '../../../services/toast.service';
 import { TabHeaderComponent } from '../tab-header.component';
 import { TemplateSwitcherComponent } from '../template-switcher.component';
 
 @Component({
   selector: 'app-profile-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, TabHeaderComponent, TemplateSwitcherComponent],
+  imports: [CommonModule, ReactiveFormsModule, TabHeaderComponent, TemplateSwitcherComponent],
   template: `
     <app-tab-header 
       title="Edit Profile" 
       (save)="save()">
     </app-tab-header>
 
-    <div class="space-y-6">
+    <div class="space-y-6" [formGroup]="form">
       <!-- Template Selection -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <app-template-switcher 
-          [selectedId]="formData.templateId" 
-          (selectionChange)="formData.templateId = $event">
+          [selectedId]="templateIdControl.value" 
+          (selectionChange)="templateIdControl.setValue($event)">
         </app-template-switcher>
       </div>
 
@@ -33,8 +34,8 @@ import { TemplateSwitcherComponent } from '../template-switcher.component';
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Username / Subdomain</label>
             <div class="flex items-center gap-2">
-              <input type="text" [(ngModel)]="formData.slug" (ngModelChange)="onSlugChange($event)"
-                  class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              <input type="text" formControlName="slug"
+                  class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-gray-900"
                   placeholder="yourname">
               <span class="text-gray-500 text-sm">.cvme.uz</span>
             </div>
@@ -54,34 +55,34 @@ import { TemplateSwitcherComponent } from '../template-switcher.component';
             </div>
           </div>
 
-          @if(profile().profile) {
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input type="text" [(ngModel)]="profile().profile.header"
-                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Headline / About</label>
-            <textarea [(ngModel)]="profile().profile.about" rows="3"
-                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Avatar</label>
-            <div class="flex items-center gap-4">
-              <div class="relative group" [class.opacity-50]="profile().profile.avatarActive === false">
-                <img [src]="profile().profile.avatar || 'https://via.placeholder.com/150'"
-                    class="w-16 h-16 rounded-full object-cover bg-gray-100 border text-xs">
-              </div>
-              <div class="flex flex-col gap-2">
-                <input type="file" (change)="onFileSelected($event)" class="text-sm">
-                <button (click)="toggleAvatar()" class="text-xs px-3 py-1 rounded border"
-                    [ngClass]="{'bg-green-100 text-green-700 border-green-300': profile().profile.avatarActive !== false, 'bg-gray-100 text-gray-600 border-gray-300': profile().profile.avatarActive === false}">
-                  {{ profile().profile.avatarActive === false ? 'Show Avatar' : 'Hide Avatar' }}
-                </button>
+          <ng-container formGroupName="profile">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input type="text" formControlName="header"
+                  class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-gray-900">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Headline / About</label>
+              <textarea formControlName="about" rows="3"
+                  class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-gray-900"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Avatar</label>
+              <div class="flex items-center gap-4">
+                <div class="relative group" [class.opacity-50]="avatarActiveControl.value === false">
+                  <img [src]="avatarControl.value || 'https://via.placeholder.com/150'"
+                      class="w-16 h-16 rounded-full object-cover bg-gray-100 border text-xs">
+                </div>
+                <div class="flex flex-col gap-2">
+                  <input type="file" (change)="onFileSelected($event)" class="text-sm">
+                  <button (click)="toggleAvatar()" class="text-xs px-3 py-1 rounded border"
+                      [ngClass]="{'bg-green-100 text-green-700 border-green-300': avatarActiveControl.value !== false, 'bg-gray-100 text-gray-600 border-gray-300': avatarActiveControl.value === false}">
+                    {{ avatarActiveControl.value === false ? 'Show Avatar' : 'Hide Avatar' }}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          }
+          </ng-container>
         </div>
       </div>
     </div>
@@ -89,56 +90,73 @@ import { TemplateSwitcherComponent } from '../template-switcher.component';
 })
 export class ProfileTabComponent implements OnInit {
   profileService = inject(ProfileService);
+  toastService = inject(ToastService);
   destroyRef = inject(DestroyRef);
+  fb = inject(FormBuilder);
 
-  formData: any = {};
+  form: FormGroup;
   profile = this.profileService.currentProfile;
   slugStatus = signal<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  private slugSubject = new Subject<string>();
   private originalSlug = '';
+
+  constructor() {
+    this.form = this.fb.group({
+      slug: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+      templateId: ['minimalist'],
+      profile: this.fb.group({
+        header: [''],
+        about: [''],
+        avatar: [''],
+        avatarActive: [true]
+      })
+    });
+  }
+
+  get templateIdControl() { return this.form.get('templateId')!; }
+  get profileGroup() { return this.form.get('profile') as FormGroup; }
+  get avatarControl() { return this.profileGroup.get('avatar')!; }
+  get avatarActiveControl() { return this.profileGroup.get('avatarActive')!; }
 
   ngOnInit() {
     this.loadProfile();
 
-    this.slugSubject.pipe(
+    this.form.get('slug')?.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(slug => {
-      if (!slug || slug === this.originalSlug) {
+    ).subscribe(value => {
+       this.handleSlugChange(value);
+    });
+  }
+
+  handleSlugChange(value: string | null) {
+      if (!value) {
+        this.slugStatus.set('idle');
+        return;
+      }
+      
+      const sanitized = value.toLowerCase().trim()
+        .replace(/[^a-z0-9-]/g, '-'); // Simple sanitization for display if needed, but Reactive Forms usually handle validation. 
+      
+      // If we want to auto-sanitize input:
+      if (value !== sanitized) {
+          this.form.get('slug')?.setValue(sanitized, { emitEvent: false });
+      }
+
+      const currentSlug = this.form.get('slug')?.value;
+      
+      if (!currentSlug || currentSlug === this.originalSlug) {
         this.slugStatus.set('idle');
         return;
       }
 
       this.slugStatus.set('checking');
-      this.profileService.checkSlugAvailability(slug).subscribe({
+      this.profileService.checkSlugAvailability(currentSlug).subscribe({
         next: (res) => {
           this.slugStatus.set(res.available ? 'available' : 'taken');
         },
         error: () => this.slugStatus.set('idle')
       });
-    });
-  }
-
-  onSlugChange(value: string) {
-    if (!value) {
-      this.formData.slug = '';
-      this.slugStatus.set('idle');
-      return;
-    }
-
-    const sanitized = value
-      .toLowerCase()
-      .trim()
-      .replace(/\./g, '-')
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '');
-    
-    this.formData.slug = sanitized;
-    this.slugSubject.next(sanitized);
   }
 
   loadProfile() {
@@ -146,7 +164,13 @@ export class ProfileTabComponent implements OnInit {
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: (data: any) => {
-        this.formData = JSON.parse(JSON.stringify(data));
+        this.form.patchValue(data);
+        // Handle nested or missing fields if necessary
+        if (!data.profile) {
+             this.form.get('profile')?.patchValue({
+                 header: '', about: '', avatar: '', avatarActive: true
+             });
+        }
         this.profile.set(data);
         this.originalSlug = data.slug;
       },
@@ -155,18 +179,24 @@ export class ProfileTabComponent implements OnInit {
   }
 
   save() {
-    this.profileService.updateProfile(this.formData)
+    if (this.form.invalid) {
+        this.toastService.error('Please check your input.');
+        return;
+    }
+    const formData = this.form.getRawValue();
+
+    this.profileService.updateProfile(formData)
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: (data: any) => {
         this.profile.set(data);
         this.originalSlug = data.slug;
         this.slugStatus.set('idle');
-        alert('Profile saved!');
+        this.toastService.success('Profile saved successfully');
       },
       error: (err) => {
-          const message = err?.message || 'Error saving';
-          alert(message);
+          const message = err?.message || 'Error saving profile';
+          this.toastService.error(message);
       }
     });
   }
@@ -178,19 +208,17 @@ export class ProfileTabComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          if (!this.formData.profile) this.formData.profile = {};
-          this.formData.profile.avatar = `${environment.fileUrl}${res.url}`;
+          const url = `${environment.fileUrl}${res.url}`;
+          this.avatarControl.setValue(url);
+          this.avatarControl.markAsDirty();
         }
       });
     }
   }
 
   toggleAvatar() {
-    if (this.formData.profile) {
-      if (this.formData.profile.avatarActive === undefined) {
-        this.formData.profile.avatarActive = true;
-      }
-      this.formData.profile.avatarActive = !this.formData.profile.avatarActive;
-    }
+    const current = this.avatarActiveControl.value;
+    this.avatarActiveControl.setValue(!current);
+    this.avatarActiveControl.markAsDirty();
   }
 }

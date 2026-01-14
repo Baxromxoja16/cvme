@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfileService } from '../../../services/profile';
 import { SkillsService } from '../../../services/skills.service';
+import { ToastService } from '../../../services/toast.service';
 import { TabHeaderComponent } from '../tab-header.component';
 
 @Component({
   selector: 'app-skills-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, TabHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, TabHeaderComponent],
   template: `
     <app-tab-header 
       title="Edit Skills" 
@@ -20,10 +21,10 @@ import { TabHeaderComponent } from '../tab-header.component';
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold mb-4">Add Skills</h3>
         <div class="flex gap-2 mb-6">
-          <input type="text" [(ngModel)]="skillInput" (keyup.enter)="addSkill()"
-              class="flex-1 px-4 py-2 border rounded-lg outline-none focus:border-blue-500"
+          <input type="text" [formControl]="skillInput" (keyup.enter)="addSkill()"
+              class="flex-1 px-4 py-2 border rounded-lg outline-none focus:border-blue-500 bg-white text-gray-900"
               placeholder="Type a skill and press Enter...">
-          <button (click)="addSkill()" [disabled]="!skillInput.trim()"
+          <button (click)="addSkill()" [disabled]="skillInput.invalid || !skillInput.value?.trim()"
               class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">Add</button>
         </div>
 
@@ -43,9 +44,10 @@ import { TabHeaderComponent } from '../tab-header.component';
 export class SkillsTabComponent implements OnInit {
   profileService = inject(ProfileService);
   skillsService = inject(SkillsService);
+  toastService = inject(ToastService);
   destroyRef = inject(DestroyRef);
 
-  skillInput = '';
+  skillInput = new FormControl('', Validators.required);
   skills = signal<string[]>([]);
   profile = this.profileService.currentProfile;
 
@@ -65,22 +67,23 @@ export class SkillsTabComponent implements OnInit {
   }
 
   addSkill() {
-    const skill = this.skillInput.trim();
-    if (skill) {
+    if (this.skillInput.valid && this.skillInput.value?.trim()) {
+      const skill = this.skillInput.value.trim();
       this.skillsService.add(skill)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updatedSkills) => {
           this.skills.set(updatedSkills);
-          this.skillInput = '';
+          this.skillInput.reset();
           // Sync with profile service if needed
           const p = this.profile();
           if (p) {
             p.skills = updatedSkills;
             this.profile.set({...p});
           }
+          this.toastService.success('Skill added');
         },
-        error: (err) => alert('Error adding skill')
+        error: (err) => this.toastService.error('Error adding skill')
       });
     }
   }
@@ -96,8 +99,9 @@ export class SkillsTabComponent implements OnInit {
           p.skills = updatedSkills;
           this.profile.set({...p});
         }
+        this.toastService.success('Skill removed');
       },
-      error: (err) => alert('Error removing skill')
+      error: (err) => this.toastService.error('Error removing skill')
     });
   }
 }
