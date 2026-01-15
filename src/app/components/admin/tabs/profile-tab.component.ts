@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DataUrl, NgxImageCompressService } from 'ngx-image-compress';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ProfileService } from '../../../services/profile';
@@ -113,6 +114,7 @@ export class ProfileTabComponent implements OnInit {
   toastService = inject(ToastService);
   destroyRef = inject(DestroyRef);
   fb = inject(FormBuilder);
+  imageCompress = inject(NgxImageCompressService);
 
   form: FormGroup;
   profile = this.profileService.currentProfile;
@@ -223,8 +225,42 @@ export class ProfileTabComponent implements OnInit {
 
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
+    
     if (file) {
-      this.profileService.uploadFile(file)
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const imageBeforeCompress = e.target.result;
+
+        // 1. Rasmni siqish jarayoni
+        // byteCount: -1 (avtomatik), ratio: 50 (50% sifat), quality: 70
+        // 200 va 200 - maksimal kenglik va balandlik
+        this.imageCompress.compressFile(imageBeforeCompress, -1, 50, 70, 200, 200)
+          .then((result: DataUrl) => {
+            // 2. Base64 natijani qaytadan 'File' ob'ektiga aylantiramiz
+            const compressedFile = this.dataURLtoFile(result, file.name);
+            // 3. Serverga yuklash
+            this.uploadToProfile(compressedFile);
+          });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Yordamchi metod: Base64 stringni File ob'ektiga aylantirish
+  private dataURLtoFile(dataurl: string, filename: string): File {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+
+  private uploadToProfile(file: File) {
+    this.profileService.uploadFile(file)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -233,7 +269,6 @@ export class ProfileTabComponent implements OnInit {
           this.avatarControl.markAsDirty();
         }
       });
-    }
   }
 
   toggleAvatar() {
