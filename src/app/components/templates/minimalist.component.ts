@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, WritableSignal, signal } from '@angular/core';
-import { jsPDF } from 'jspdf';
 
 @Component({
   selector: 'app-minimalist-template',
@@ -10,7 +9,7 @@ import { jsPDF } from 'jspdf';
     <div class="min-h-screen bg-white text-gray-900 font-sans py-10 px-6">
       <div id="cv-layout" class="max-w-2xl mx-auto" [class.is-printing]="isPrinting()">
         <!-- Header -->
-        <header class="text-center mb-10" [class.mb-6]="isPrinting()">
+        <header class="text-center mb-10" [class.mb-4]="isPrinting()">
           @if (user.profile.avatar && user.profile.avatarActive !== false) {
             <img [src]="user.profile.avatar" class="w-32 h-32 rounded-full mx-auto mb-6 object-cover shadow-sm border border-gray-100">
           }
@@ -19,7 +18,7 @@ import { jsPDF } from 'jspdf';
         </header>
 
         <!-- Social/Contacts -->
-        <div class="flex justify-center gap-4 mb-10 flex-wrap" [class.mb-4]="isPrinting()">
+        <div class="flex justify-center gap-4 mb-10 flex-wrap" [class.mb-6]="isPrinting()">
           @for (contact of user.contacts; track contact.value) {
             <a [href]="contact.value" 
               target="_blank" 
@@ -46,17 +45,17 @@ import { jsPDF } from 'jspdf';
         <!-- Experience -->
         @if (user.experience?.length) {
           <section class="mb-10" [class.mb-6]="isPrinting()">
-            <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-4]="isPrinting()">Experience</h2>
-            <div class="space-y-10" [class.space-y-4]="isPrinting()">
+            <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-2]="isPrinting()">Experience</h2>
+            <div class="space-y-10" [class.space-y-2]="isPrinting()">
               @for (exp of user.experience; track exp.company) {
                 <div>
                   <h3 class="text-lg font-semibold">{{ exp.position }}</h3>
                   <p class="text-gray-600">{{ exp.company }}</p>
-                  <p class="text-sm text-gray-400 mt-1">
+                  <p class="text-xs text-gray-400 mt-1">
                     {{ exp.startDate | date:'MMM yyyy' }} — {{ exp.endDate ? (exp.endDate | date:'MMM yyyy') : 'Present' }}
                   </p>
                   @if (exp.description) {
-                    <p class="mt-3 text-gray-600 leading-relaxed">{{ exp.description }}</p>
+                    <p class="mt-3 text-gray-600 leading-relaxed text-xs">{{ exp.description }}</p>
                   }
                 </div>
               }
@@ -67,7 +66,7 @@ import { jsPDF } from 'jspdf';
         <!-- Skills -->
         @if (user.skills?.length) {
           <section class="mb-10" [class.mb-6]="isPrinting()">
-            <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-4]="isPrinting()">Skills</h2>
+            <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-2]="isPrinting()">Skills</h2>
             <div class="flex flex-wrap gap-2 text-sm" [class.flex-wrap]="isPrinting()">
               @for (skill of user.skills; track skill) {
                 <span class="px-4 py-2 bg-gray-50 text-gray-700 rounded-md border border-gray-100">{{ skill }}</span>
@@ -79,7 +78,7 @@ import { jsPDF } from 'jspdf';
         <!-- Education -->
         @if (user.education?.length) {
           <section class="mb-10" [class.mb-6]="isPrinting()">
-            <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-4]="isPrinting()">Education</h2>
+            <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-2]="isPrinting()">Education</h2>
             <div class="space-y-8" [class.space-y-4]="isPrinting()">
               @for (edu of user.education; track edu.institution) {
                 <div>
@@ -93,48 +92,67 @@ import { jsPDF } from 'jspdf';
         }
 
         <footer class="text-center pt-10 border-t border-gray-50 text-xs text-gray-300">
-          <p>Created with <a href="/" class="hover:text-blue-500 transition-colors">cvme.uz</a></p>
+          <p>Created with <a href="/" class="text-blue-500 transition-colors">cvme.uz</a></p>
         </footer>
       </div>
     </div>
+  `,
+  styles: `
+    @media print {
+      /* Sahifa chekkasidagi oq bo'shliqlarni (margin) brauzer sozlamasiga moslaymiz */
+      @page {
+        size: A4;
+        margin: 0; 
+      }
+
+      body {
+        padding: 15mm; 
+        background: white !important;
+        -webkit-print-color-adjust: exact; /* Ranglar va backgroundlar o'chib ketmasligi uchun */
+        print-color-adjust: exact;
+      }
+
+      #cv-layout {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+
+      /* Flex va Grid'lar PDF-da buzilmasligi uchun */
+      .flex {
+        display: flex !important;
+      }
+      .gap-4 {
+        gap: 1rem !important;
+      }
+    }
+  
   `
 })
 export class MinimalistTemplateComponent {
   @Input({ required: true }) user: any;
   isPrinting: WritableSignal<boolean> = signal(false);
-
-  async generatePDF() {
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const element = document.getElementById('cv-layout');
-    
-    if (!element) return;
-
-    // 1. PDF uchun bo'shliqlarni qisqartirishni yoqamiz
+  
+  generatePDF() {
+    // 1. PDF uchun maxsus dizaynni yoqamiz
     this.isPrinting.set(true);
+
+    // 2. Sahifa sarlavhasini (Title) vaqtincha saqlab qo'yamiz
+    const originalTitle = document.title;
     
-    // UI yangilanishi uchun juda qisqa vaqt kutamiz
-    setTimeout(async () => {
-      await doc.html(element, {
-        callback: (pdf) => {
-          pdf.save(`${this.user.profile.header || 'resume'}.pdf`);
-          
-          // 2. Jarayon tugagach hamma narsani eski holiga qaytaramiz
-          this.isPrinting.set(false);
-        },
-        x: 0,
-        y: 0,
-        width: 210,
-        windowWidth: 800,
-        autoPaging: 'text',
-        html2canvas: {
-          scale: 0.2645,
-          useCORS: true,
-          logging: false,
-          letterRendering: true,
-          imageTimeout: 15000,
-          removeContainer: true,
-        }
-      });
-    }, 500); // 100ms kutish Angular-ning dom-ni qayta chizishiga yetarli
+    // 3. Yangi sarlavha o'rnatamiz (bu PDF fayl nomi bo'ladi)
+    document.title = 'cvme.uz';
+
+    // 4. Angular DOM-ni yangilashi uchun ozgina vaqt beramiz
+    setTimeout(() => {
+      window.print();
+
+      // 5. Print oynasi yopilgach, sarlavhani va flagni eski holiga qaytaramiz
+      document.title = originalTitle;
+      this.isPrinting.set(false);
+    }, 150);
   }
 }
