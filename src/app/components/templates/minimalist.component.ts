@@ -55,7 +55,7 @@ import { Component, Input, WritableSignal, signal } from '@angular/core';
                     {{ exp.startDate | date:'MMM yyyy' }} — {{ exp.endDate ? (exp.endDate | date:'MMM yyyy') : 'Present' }}
                   </p>
                   @if (exp.description) {
-                    <p class="mt-3 text-gray-600 leading-relaxed text-xs">{{ exp.description }}</p>
+                    <p class="mt-3 text-gray-600 leading-relaxed" [class.text-xs]="isPrinting()">{{ exp.description }}</p>
                   }
                 </div>
               }
@@ -68,9 +68,7 @@ import { Component, Input, WritableSignal, signal } from '@angular/core';
           <section class="mb-10" [class.mb-6]="isPrinting()">
             <h2 class="text-sm uppercase tracking-widest text-gray-400 font-semibold mb-8 border-b pb-2" [class.mb-2]="isPrinting()">Skills</h2>
             <div class="flex flex-wrap gap-2 text-sm" [class.flex-wrap]="isPrinting()">
-              @for (skill of user.skills; track skill) {
-                <span class="px-4 py-2 bg-gray-50 text-gray-700 rounded-md border border-gray-100">{{ skill }}</span>
-              }
+              <span class="px-2 py-1 text-gray-700 rounded-md border border-gray-100">{{ user.skills.join(' | ') }}</span>
             </div>
           </section>
         }
