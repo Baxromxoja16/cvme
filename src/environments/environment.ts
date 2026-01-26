@@ -1,9 +1,9 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://piggy-bank-bhxy.onrender.com/api',
-    authUrl: 'https://piggy-bank-bhxy.onrender.com/api/auth',
+    apiUrl: 'https://api.cvme.uz/api',
+    authUrl: 'https://api.cvme.uz/api/auth',
     baseUrl: 'https://cvme.uz',
     baseDomain: 'cvme.uz',
-    fileUrl: 'https://piggy-bank-bhxy.onrender.com'
+    fileUrl: 'https://api.cvme.uz'
 };
 
